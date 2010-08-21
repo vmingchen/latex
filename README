@@ -1,0 +1,25 @@
+About
+This repo contains my latex files. Most of them are source files of my academic
+papers published during my Master study. They are: 
+
+    Ming Chen, Zhenyong Chen, Xiao Zeng, Zhang Xiong, "Model Order Selection in
+    Reversible Image Watermarking," IEEE Journal of Selected Topics in Signal
+    Processing, Vol. 4, No. 3, pp. 592-604, 2010. 
+
+    Ming Chen, Zhenyong Chen, Xiao Zeng, Zhang Xiong, "Reversible Data Hiding
+    Using Additive Prediction-Error Expansion," ACM Workshop on Multimedia and
+    Security, Princeton, NJ, 2009, pp. 16-21.
+
+    Ming Chen, Zhenyong Chen, Xiao Zeng, Zhang Xiong, "Reversible Image
+    Watermarking with Full Context Prediction," IEEE International Conference on
+    Image Processing, Cairo, Egypt, 2009, pp. 4253-4256.
+
+
+Contents
+jstsp.tex, icip.tex, mmsec.tex are source files of these papers. 
+icip-poster.pdf is the poster for ICIP 2009 at Cario.
+mmsec-slides.tex is the slides for MMSEC 2009 in Princeton University.
+other .tex are sources of pictures I drawed using PSTricks.
+.mp are sources of pictures I drawed using Metapost.
+.asy are sources of pictures I drawed using Asymptote.
+wmbib.bib is my bibtex file
