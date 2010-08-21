@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{epsfig}
+\usepackage{pstricks}
+
+\pagestyle{empty}
+\begin{document}
+%\color{white}% fbox invisible
+\fboxsep=0pt
+%\fbox{%
+  \begin{pspicture}(0,0)(12,4.5)
+    \psframe[linestyle=dashed](0,1.5)(2,3) 
+      \psframe[linestyle=solid](2,1.5)(4,3) \rput(3,2.25){Embedding}
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(3,4)(3,3) \rput(3.9,3.6){Stego-key $k$}
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(1,2.25)(2,2.25) \rput(1,2.5){Cover-} \rput(1,2){data $\mathbf{c}$}
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(3,0.5)(3,1.5) \rput(3.8,1){Embedded} \rput(3.8,0.7){data $m$}
+
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(4,2.25)(7,2.25)
+      \rput(5.5,2.5){Stego-data $\mathbf{s}$}
+
+      \psframe[linestyle=solid](7,1.5)(9,3) \rput(8,2.25){Extracting}
+      \psframe[linestyle=dashed](9,1.5)(11,3) 
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(8,4)(8,3) \rput(8.9,3.6){Stego-key $k$}
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{->}(9,2.25)(9.6,2.25)
+      \rput(10.2,2.5){Restored} \rput(10.2,2){cover $\mathbf{c}'$}
+      \psline[arrowsize=2pt 4,arrowlength=2,arrowinset=0]{<-}(8,0.5)(8,1.5) \rput(8.8,1){Embedded} \rput(8.8,0.7){data $m$}
+
+  \end{pspicture}
+%}
+\end{document}

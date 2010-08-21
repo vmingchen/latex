@@ -1,0 +1,150 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{pstricks}
+\usepackage[rfit]{floatflt}
+\pagestyle{empty}
+
+
+\usepackage[rfit]{floatflt}
+
+\makeatletter
+
+\def\x{{\mathbf x}}
+\def\l{{\cal l}}
+
+\def\pshs@solid{0 setlinecap }
+\def\pshs@dashed{[ \psk@dash ] 0 setdash }
+\def\pshs@dotted{[ 0 \psk@dotsep CLW add ] 0 setdash 1 setlinecap }
+\def\psset@hatchstyle#1{%
+\@ifundefined{pshs@#1}%
+{\@pstrickserr{Hatch style `#1' not defined}\@eha}%
+{\edef\pshatchstyle{#1}}}
+
+\psset@hatchstyle{solid}
+
+\def\pst@linefill{%
+% D.G. modification begin - Sep.  1, 2002
+\@nameuse{pshs@\pshatchstyle}
+% D.G. modification end
+\psk@hatchangle rotate
+\psk@hatchwidth SLW
+\pst@usecolor\pshatchcolor
+\psk@hatchsep
+\tx@LineFill}
+
+\pst@def{LineFill}<{%
+gsave
+  abs CLW add
+  /a ED
+  a 0 dtransform
+  round exch round exch 2 copy idtransform
+  exch Atan rotate idtransform
+  pop
+  /a ED
+  .25 .25 itransform
+  pathbbox
+  /y2 ED
+  a Div ceiling cvi
+  /x2 ED
+  /y1 ED
+  a Div cvi
+  /x1 ED
+  /y2 y2 y1 sub def
+  clip
+  newpath
+% D.G. modification begin - Sep.  1, 2002
+%  2 setlinecap
+% D.G. modification end
+  systemdict
+  /setstrokeadjust
+    known { true setstrokeadjust } if
+    x2 x1 sub 1 add
+    { x1 a mul y1 moveto
+      0 y2 rlineto
+      stroke
+      /x1 x1 1 add def } repeat
+  grestore
+pop pop}>
+
+\makeatother
+
+\begin{document}
+\begin{figure}[t]
+  \begin{minipage}[t]{.48\linewidth}
+    \centering
+    \begin{pspicture}(0,0)(3.2,3.2)
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](0,0)(1,1) \rput(0.5,0.5){SW}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](1,0)(2,1) \rput(1.5,0.5){S}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](2,0)(3,1) \rput(2.5,0.5){SE}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](0,1)(1,2) \rput(0.5,1.5){W}
+      \psframe[fillstyle=none,hatchcolor=gray](1,1)(2,2) \rput(1.5,1.5){?}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](2,1)(3,2) \rput(2.5,1.5){E}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](0,2)(1,3) \rput(0.5,2.5){NW}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](1,2)(2,3) \rput(1.5,2.5){N}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](2,2)(3,3) \rput(2.5,2.5){NE}
+    \end{pspicture}
+    \centerline{(a) 1st pass, process $U_1$}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \begin{pspicture}(0,0)(3.2,3.2)
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](0,0)(1,1) \rput(0.5,0.5){SW}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](1,0)(2,1) \rput(1.5,0.5){S}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](2,0)(3,1) \rput(2.5,0.5){SE}
+      \psframe[fillstyle=none,hatchcolor=gray](0,1)(1,2) \rput(0.5,1.5){W'}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](1,1)(2,2) \rput(1.5,1.5){?}
+      \psframe[fillstyle=none,hatchcolor=gray](2,1)(3,2) \rput(2.5,1.5){E'}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](0,2)(1,3) \rput(0.5,2.5){NW}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](1,2)(2,3) \rput(1.5,2.5){N}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](2,2)(3,3) \rput(2.5,2.5){NE}
+    \end{pspicture}
+    \centerline{(b) 2nd pass, process $U_2$}\medskip
+  \end{minipage}
+
+  \begin{minipage}[c]{.48\linewidth}
+    \centering
+    \begin{pspicture}(0,0)(3.2,3.2)
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](0,0)(1,1) \rput(0.5,0.5){SW'}
+      \psframe[fillstyle=none,hatchcolor=gray](1,0)(2,1) \rput(1.5,0.5){S'}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](2,0)(3,1) \rput(2.5,0.5){SE'}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](0,1)(1,2) \rput(0.5,1.5){W}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](1,1)(2,2) \rput(1.5,1.5){?}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](2,1)(3,2) \rput(2.5,1.5){E}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](0,2)(1,3) \rput(0.5,2.5){NW'}
+      \psframe[fillstyle=none,hatchcolor=gray](1,2)(2,3) \rput(1.5,2.5){N'}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](2,2)(3,3) \rput(2.5,2.5){NE'}
+    \end{pspicture}
+    \centerline{(c) 3rd pass, process $U_3$}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[c]{0.48\linewidth}
+    \centering
+    \begin{pspicture}(0,0)(3.2,3.2)
+      \psframe[fillstyle=none,hatchcolor=gray](0,0)(1,1) \rput(0.5,0.5){SW'}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](1,0)(2,1) \rput(1.5,0.5){S'}
+      \psframe[fillstyle=none,hatchcolor=gray](2,0)(3,1) \rput(2.5,0.5){SE'}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](0,1)(1,2) \rput(0.5,1.5){W'}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](1,1)(2,2) \rput(1.5,1.5){?}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](2,1)(3,2) \rput(2.5,1.5){E'}
+      \psframe[fillstyle=none,hatchcolor=gray](0,2)(1,3) \rput(0.5,2.5){NW'}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](1,2)(2,3) \rput(1.5,2.5){N'}
+      \psframe[fillstyle=none,hatchcolor=gray](2,2)(3,3) \rput(2.5,2.5){NE'}
+    \end{pspicture}
+    \centerline{(d) 4th pass, process $U_4$}\medskip
+  \end{minipage}
+
+  \begin{minipage}[b]{0.98\linewidth}
+    \centering
+    \begin{pspicture}(0,0)(6,1.5)
+      \psframe[fillstyle=none,hatchcolor=gray](0,0.8)(0.5,1.3) \rput[l](0.6,1){pixels in $U_1$}
+      \psframe[fillstyle=vlines,hatchstyle=dashed,hatchcolor=gray](3,0.8)(3.5,1.3) \rput[l](3.6,1){pixels in $U_2$}
+      \psframe[fillstyle=hlines,hatchstyle=dashed,hatchcolor=gray](0,0)(0.5,0.5) \rput[l](0.6,0.2){pixels in $U_3$}
+      \psframe[fillstyle=hlines,hatchstyle=dotted,hatchcolor=gray](3,0)(3.5,0.5) \rput[l](3.6,0.2){pixels in $U_4$}
+    \end{pspicture}
+  \end{minipage}
+\end{figure}
+\end{document}

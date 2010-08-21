@@ -1,0 +1,95 @@
+\documentclass{article}
+\usepackage{epsfig}
+\usepackage{amssymb}
+\usepackage{pstricks}
+\pagestyle{empty}
+
+\makeatletter
+
+\def\x{{\mathbf x}}
+\def\l{{\cal l}}
+
+\def\pshs@solid{0 setlinecap }
+\def\pshs@dashed{[ \psk@dash ] 0 setdash }
+\def\pshs@dotted{[ 0 \psk@dotsep CLW add ] 0 setdash 1 setlinecap }
+\def\psset@hatchstyle#1{%
+\@ifundefined{pshs@#1}%
+{\@pstrickserr{Hatch style `#1' not defined}\@eha}%
+{\edef\pshatchstyle{#1}}}
+
+\psset@hatchstyle{solid}
+
+\def\pst@linefill{%
+% D.G. modification begin - Sep.  1, 2002
+\@nameuse{pshs@\pshatchstyle}
+% D.G. modification end
+\psk@hatchangle rotate
+\psk@hatchwidth SLW
+\pst@usecolor\pshatchcolor
+\psk@hatchsep
+\tx@LineFill}
+
+\pst@def{LineFill}<{%
+gsave
+  abs CLW add
+  /a ED
+  a 0 dtransform
+  round exch round exch 2 copy idtransform
+  exch Atan rotate idtransform
+  pop
+  /a ED
+  .25 .25 itransform
+  pathbbox
+  /y2 ED
+  a Div ceiling cvi
+  /x2 ED
+  /y1 ED
+  a Div cvi
+  /x1 ED
+  /y2 y2 y1 sub def
+  clip
+  newpath
+% D.G. modification begin - Sep.  1, 2002
+%  2 setlinecap
+% D.G. modification end
+  systemdict
+  /setstrokeadjust
+    known { true setstrokeadjust } if
+    x2 x1 sub 1 add
+    { x1 a mul y1 moveto
+      0 y2 rlineto
+      stroke
+      /x1 x1 1 add def } repeat
+  grestore
+pop pop}>
+
+\makeatother
+
+\begin{document}
+%\color{white}% fbox invisible
+\fboxsep=0pt
+%\fbox{%
+    \begin{pspicture}(0,0)(6.5,4.2)
+      \psset{linewidth=0.5pt}
+      \pspolygon[linecolor=black,fillstyle=solid,fillcolor=lightgray](0.2,2)(0.2,3.5)(3,3.5)(3,2.2)(1.5,2.2)(1.5,2)
+      \pspolygon[fillstyle=hlines,hatchcolor=gray](0,0.5)(0.2,0.5)(0.2,3.5)(3,3.5)(3,3.7)(0,3.7)
+      \psframe(1.5,2)(1.7,2.2)
+      \pspolygon(0.2,0.5)(3,0.5)(3,2.2)(1.7,2.2)(1.7,2)(0.2,2)
+      \rput(1.5,3.8){Marginal}
+      \rput(1.5,3){Stego}
+      \rput(1.5,1){Original}
+      \psellipse(1.5,2.2)(0.5,0.3)
+      \psframe[fillstyle=solid,fillcolor=lightgray](4,2)(4.8,2.8) \rput(4.4,2.4){NW}
+      \psframe[fillstyle=solid,fillcolor=lightgray](4,1.2)(4.8,2) \rput(4.4,1.6){W}
+      \psframe[fillstyle=solid,fillcolor=lightgray](4.8,2)(5.6,2.8) \rput(5.2,2.4){N}
+      \psframe[fillstyle=solid,fillcolor=white](4.8,1.2)(5.6,2) \rput(5.2,1.6){?}
+      \psellipse(4.8,2)(1.5,1)
+      \psline[linestyle=dashed](1.5,1.9)(4.8,1)
+      \psline[linestyle=dashed](1.5,2.5)(4.8,3)
+      \rput(1.5,0.25){Cover-image}
+      \rput(4.8,3.2){prediction context}
+      \psline{->}(5.2,0.6)(5.2,1.2)
+      \rput(5.2,0.4){current pixel}
+    \end{pspicture}
+%}
+\end{document}

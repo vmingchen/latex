@@ -1,0 +1,412 @@
+\documentclass[slidestop,compress]{beamer}
+\usepackage{epsfig}
+\usetheme{Singapore} % Beamer theme v 3.0
+\setbeamertemplate{footline}{}
+\usecolortheme{lily}
+%\usetheme{Boadilla}
+
+\begin{document}
+
+\logo{\includegraphics[width=1.2cm,height=1.2cm]{beihang.eps}}
+\title{Reversible Data Hiding \\ Using Additive Prediction-Error Expansion}
+\author{Ming Chen \\ mingchen@cse.buaa.edu.cn \\ \small{Zhenyong Chen, Xiao Zeng, Zhang Xiong} }
+\institute{\large{School of Computer Science and Engineering \\ Beihang University}}
+\date{\small{\today}}
+
+\frame[plain]{\titlepage}
+
+\section{Introduction}
+\subsection*{Contents}
+\begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents
+\end{frame}
+
+\begin{frame}
+\frametitle{Reversible Data Hiding}
+    Introduction to reversible data hiding
+    \begin{itemize} 
+	\item reversible image watermarking/lossless data embedding
+	\item military and medical imaging, metadata embedding (Unmanned Aerial Vehicle, UAV)
+	\item embedding capacity (number of bits, bit per pixel or bpp) 
+	\item image fidelity (PSNR)
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \centering
+    \includegraphics[width=7.5cm]{wmsys.eps} \\
+    \tiny{A Simple Model of Reversible Data Hiding. \\ The stego-data $\mathbf{s}$ should be
+    perceptually close to the cover-data $\mathbf{c}$ to keep distortion low, \\ and the cover-data
+    should be recovered exactly to guarantee reversibility $\mathbf{c'} \equiv \mathbf{c}$.}
+
+\end{frame}
+
+\section{Expansion}
+\subsection{Prediction-Error Expansion}
+\begin{frame}
+    \frametitle{Prediction-Error Expansion}
+    \centering
+    \includegraphics[width=7cm]{sgap.eps}
+    \begin{enumerate}
+	\item Prediction: $\hat{x} = \frac{x_n + x_w}{2} + \frac{x_{ne} - x_{nw}}{4}. $
+	\item Prediction-Error: $e = x - \hat{x}$
+	\item Expansion: $e' = e \times n + (b)_n + c$
+	\item Marked pixel: $x' = \hat{x} + e'$
+    \end{enumerate}
+\end{frame}
+
+% How data hiding is achieved in an invertible manner
+\subsection{Generalized Expansion}
+\begin{frame}
+    \frametitle{Generalized Expansion}
+    Embedding: 
+    \vspace{-0.3cm}
+    \begin{equation}\label{eqn:gpe1}
+      e' = e \times n + (b)_n + c, \quad Tl \le e \le Tr
+    \end{equation}
+    \vspace{-0.8cm}
+    \begin{itemize}
+	\item $e, e'$: prediction-error (pixel's intensity value, block-difference)
+	\item $(b)_n, n$: $n$-ary secret digit, e.g.\ a bit when $n$ is 2 
+	\item $Tl, Tr$: thresholds to control capacity 
+	\item $c$: a constant to control distortion
+    \end{itemize}
+    Extracting: $(b)_n = (e' - c) \% n$	\\
+    Recovery: $ e = \lfloor (e' - c) / n \rfloor $ \\
+    \begin{example}
+	Given $n=2$, $c=0$, and $Tl = Tr = 2$. If $(b)_2 = 0$, then \\
+	\centerline{$e' = e \times 2 + (b)_2 + 0 = 2 \times 2 + 0 = 4$}
+	or if $(b)_2 = 1$, then \\
+	\centerline{$e' = e \times 2 + (b)_2 + 0 = 2 \times 2 + 1 = 5$}
+    \end{example}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Embedding Capacity}
+    \centering
+    \includegraphics[width=6cm]{capacity.eps}
+    \begin{itemize}
+	\item Overall capacity $\mathcal{O}$: $n$, $\sum_{e = Tl}^{Tr} \mathit{hist} (e)$ \\
+	\item Overhead cost $\mathcal{C}$: bookkeeping data	\\
+	\item Pure capacity $\mathcal{P}$: $ \mathcal{P} = \mathcal{O} - \mathcal{C}$ \\
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Image Fidelity}
+    Distortion:
+    \begin{equation}\label{eqn:distort}
+      \Delta e = e' - e = e \times (n-1) + (b)_n + c, \quad Tl \le e \le Tr
+    \end{equation}
+    \begin{itemize}
+	\item $e$: \textbf{small} value (prediction-error, block-difference)
+	\item $n$: radix of secret data
+	\item $(b)_n$: data embedded
+	\item $c$: constant
+    \end{itemize}
+\end{frame}
+
+\section{Prediction}
+\subsection{Linear Prediction}
+\begin{frame}
+\frametitle{(Piecewise) Linear Prediction}
+    \begin{itemize}
+	\item MED (Median Edge Detection)
+	  \begin{equation}\label{eqn:med1}
+	    \hat{x} = \left\{ \begin{array}{l@{,\quad}l}
+		\min(x_w,x_n) 	& x_{nw} \ge \max(x_w,x_n) \\
+		\max(x_w,x_n) 	& x_{nw} \le \min(x_w,x_n) \\
+		x_n + x_w - x_{nw} 	& otherwise.
+	  \end{array} \right. 
+	  \end{equation}  
+	\item GAP (Gradient-Adjusted Prediction)
+	\item SGAP (Simplified GAP)
+	\item EDP (Edge-Directed Prediction, LS-based Prediction)
+	    \begin{equation*}
+		D_{\mbox{\small{MSE}}} = \sum (x - \hat{x})^2
+	    \end{equation*}
+	\item Square Error vs.\ Absolute Error
+	    \begin{equation*}
+		D_{\mbox{\small{MAE}}} = \sum |x - \hat{x}|
+	    \end{equation*}
+    \end{itemize}
+\end{frame}
+
+\subsection{Context Modeling}
+\begin{frame}
+\frametitle{Context Modeling}
+    \centering{\includegraphics[width=6cm]{texture.eps}}
+    \begin{itemize}
+	\item Prediction: low-order image correlation  
+	\item Context modeling: high-order image correlation (texture)
+    \end{itemize}
+\end{frame}
+
+\subsection{Full Context Prediction}
+\begin{frame}
+\frametitle{Full Context Prediction}
+    \vspace{0.8cm}
+    \begin{columns}[c]
+	\column{.58\textwidth}
+	    \includegraphics[width=6.5cm,height=6cm]{full.eps}
+	\column{.42\textwidth}
+	    \includegraphics[width=5cm,height=3.6cm]{sgap.eps}
+    \end{columns}
+\end{frame}
+
+\section{Results}
+\subsection*{Results }
+\begin{frame}
+\frametitle{Low Capacity Embedding }
+    Results of low capacity embedding (Full Context Prediction): \\
+    \begin{table}
+      \setlength{\tabcolsep}{1.2mm}
+      \begin{tabular}{lcccccc} \hline
+	Image & \multicolumn{5}{c}{Capacity (number of bits)} & PSNR\\ 
+	 & $U_1$ & $U_2$ & $U_3$ & $U_4$ & Pure (bpp) & value  \\ \hline\hline
+	Lena 	& 18341	& 17333	& 17904	& 17097	& 70627 (0.27) & 49.6 \\
+	Baboon	& 6342	& 6213	& 6102	& 6025	& 24634 (0.09) & 48.6 \\
+	Plane 	& 19658	& 19658	& 19577	& 19453	& 78154 (0.30) & 50.1 \\
+	Boat	& 9740	& 9474	& 9822	& 9440	& 38316	(0.15) & 48.9 \\
+	Tiffany 	& 12202 & 11609 & 11734 & 11519 & 46056 (0.18) & 49.1 \\
+	Barbara	& 12765	& 11877 & 12622 & 11797 & 48997 (0.19) & 49.1 \\
+	Peppers	& 10588 & 9980 	& 10040 & 9269 	& 39733 (0.15) & 48.9 \\
+	Goldhill	& 11482	& 11478	& 11470	& 11248	& 45630 (0.17) & 49.0 \\ 
+	Average	& 12640	& 12203 & 12409 & 11981 & 49018 (0.19) & 49.2 \\ \hline
+      \end{tabular}
+    \end{table}
+    \tiny{all images are 8-bit grayscale versions of standard test images.}
+\end{frame}
+
+\begin{frame}
+\frametitle{Medium Capacity Embedding}
+    Results of medium capacity embedding (Lena, CALIC): \\
+    \centering
+    \includegraphics[width=7cm,height=4.5cm]{mid.eps}
+    \tiny{
+    \begin{itemize}
+	\item H1: Y.~Hu, H.-K. Lee, and J.~Li, ``\uppercase{DE}-based reversible data hiding with
+	    improved overflow location map,'' \emph{IEEE Trans. Circuits and Systems for Video
+	    Technology}, vol.~19, no.~2, pp. 250--260, Feb. 2009.
+	\item K1: K.-S. Kim, M.-J. Lee, H.-K. Lee, and Y.-H. Suh, ``Histogram-based reversible data
+	    hiding technique using subsampling,'' in \emph{ACM Multimedia and Security 08}, Oxford,
+	    UK, 2008, pp. 69--75.
+	\item K2: H.-J. Kim, V.~Sachnev, Y.~Q. Shi, J.~Nam, and H.-G. Choo, ``A novel difference
+	    expansion \\ transform for reversible data embedding,'' \emph{IEEE Trans. Information
+	    Forensic and Security}, vol.~3, \\ no.~3, pp. 456--465, 2008.
+	\item N2: Generalized expansion with CALIC context modeling when $n$ assumes 2.
+	\item P3: D.~M. Thodi and J.~J. Rodriguez, ``Expansion embedding techniques for reversible
+	    watermarking,'' \emph{IEEE Trans. Image Processing}, vol.~16, no.~3, pp. 721--730, 2007.
+    \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+\frametitle{High Capacity Embedding}
+    Results of high capacity embedding (Lena, CALIC): \\
+    \centering
+    \includegraphics[width=8cm]{high.eps}
+    \tiny{
+    \begin{itemize}
+	\item H2: J.-Y. Hsiao, K.-F. Chan, and J.~M. Chang, ``Block-based reversible data
+	    embedding,'' \emph{Signal Processing}, vol.~89, pp. 556--569, 2009.
+	\item L1: C.-C. Lin and N.-L. Hsueh, ``A lossless data hiding scheme based on three-pixel
+	    block differences,'' \emph{Pattern Recognition}, vol.~41, no.~4, pp.  1415--1425, 2008.
+	\item L2: C.-C. Lin, W.-L. Tai, and C.-C. Chang, ``Multilevel reversible data hiding based on
+	    histogram modification of difference images,'' \emph{Pattern Recognition}, vol.~41, pp.
+	    3582--3591, 2008.
+	\item N2, N3, N4: Generalized expansion with CALIC context modeling when $n$ assumes 2, 3,
+	    4.
+    \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+\frametitle{Visual Quality }
+    \begin{columns}[c]
+	\column{.49\textwidth}
+	\includegraphics[width=5cm,height=5cm]{olena.eps} \\
+	Original Lena
+	\column{.49\textwidth}
+	\includegraphics[width=5cm,height=5cm]{wle_9036_3714.eps} \\
+	37.14 dB with 0.90 bpp
+    \end{columns}
+\end{frame}
+
+\section{Summary}
+\subsection*{Summary}
+\begin{frame}
+    \frametitle{Summary}
+    Main points: \\
+    \begin{itemize}
+	\item Prediction-Error Expansion
+	\item Generalized Expansion
+	\item Linear Prediction
+	\item Context Modeling
+	\item Full Context Prediction
+    \end{itemize}
+    Limits: \\
+    \begin{itemize}
+	\item Theoretical analysis
+	\item Security discussion
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Thank You!!!}
+    \centering
+    \hspace{2cm}
+    \includegraphics[width=7cm]{thanks.eps}
+\end{frame}
+
+\begin{frame}
+\frametitle{References}
+\tiny{
+    \begin{thebibliography}{10}
+    \bibitem{Alattar04deip}
+A.~M. Alattar, ``Reversible watermark using the difference expansion of a generalized integer
+transform,'' \emph{IEEE Trans. Image Processing}, vol.~3, no.~8, pp.  1147--1156, 2004.
+
+    \bibitem{Willems03}
+F. M. J. Willems, D. Maas, and T. Kalker, ``Semantic lossless source coding,'' DIMACS Workshop on
+Computer Networks, Rutgers University, NJ, Mar, 2003.
+
+    \bibitem{Fridrich02lossless}
+J.~Fridrich, M.~Goljan, and R.~Du, ``Lossless data embedding - new paradigm in digital
+watermarking,'' \emph{EURASIP Journal on Applied Signal Processing}, vol. 2002, pp. 185--196, 2002.
+
+    \bibitem{Tian03de}
+J.~Tian, ``Reversible data embedding using a difference expansion,'' \emph{IEEE Trans. Circuits and
+Systems for Video Technology}, vol.~13, no.~8, pp.  890--896, 2003.
+
+    \bibitem{Chen09add}
+M.~Chen, Z.~Chen, X.~Zeng, and Z.~Xiong, ``Reversible data hiding using additive prediction-error
+expansion,'' in \emph{ACM Multimedia and Security 09}, Princeton, New Jersey, 2009.
+
+    \bibitem{Chen09full}
+M.~Chen, Z.~Chen, X.~Zeng, and Z.~Xiong, ``Reversible image watermarking based on full context
+prediction,'' in \emph{ICIP 2009}, Cairo, Egypt, 2009.
+
+    \bibitem{Marcinak}
+M.~P. Marcinak and B.~G. Mobasseri, ``Digital video watermarking for metadata
+  embedding in \uppercase{UAV} video,'' in \emph{IEEE MILCOM 2005}, Atlantic
+  City, USA, 2005, pp. 1637--1641.
+
+    \bibitem{Memon97predictors}
+N.~Memon and X.~Wu, ``Recent developments in context-based predictive
+  techniques for lossless image compression,'' \emph{The Computer Journal},
+  vol.~40, no.~2, pp. 127--136, 1997.
+
+    \bibitem{Wu97calic2}
+X.~Wu and N.~Memon, ``Context-based, adaptive, lossless image coding,'' \emph{IEEE Trans.
+Communication}, vol.~45, no.~4, pp. 437--444, 1997.
+
+    \bibitem{Ni06hist}
+Z.~Ni, Y.-Q. Shi, N.~Ansari, and W.~Su, ``Reversible data hiding,'' \emph{IEEE Trans. Circuits and
+Systems for Video Technology}, vol.~16, no.~3, pp.  354--362, 2006.
+
+    \end{thebibliography}
+}
+\end{frame}
+
+\appendix
+\section{\appendixname}
+\begin{frame}
+    \frametitle{Histogram Operation}
+    \begin{columns}[c]
+	\column{.36\textwidth}
+	    \begin{enumerate}
+		\item histogram peak (M) and valley (L)
+		\item histogram shifting
+		\item embedding (0 or 1)
+	    \end{enumerate}
+	\column{.62\textwidth}
+	    \includegraphics[width=7cm]{hist.eps}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Difference Expansion}
+    \centering
+    \includegraphics[width=10cm]{bde.eps} \\
+    Embedding: $ bd' = 2bd + (b)_2 $ \\
+    Extracting:$ (b)_2 = bd' \bmod 2 $\\
+    Recovery: $ bd = 2 \lfloor bd'/2 \rfloor $\\
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Histogram Shifting}
+    Expanded prediction-errors:
+    \begin{equation}\label{eqn:range1}
+	Tl \times n + c \le e' \le Tr \times n + (n-1) + c.
+    \end{equation}
+    For unexpanded prediction-errors:
+    \begin{equation}\label{eqn:shift}
+	e' = \left\{\begin{array}{l@{,\quad}l}
+	    e + (Tr+1) \times (n-1) + c	& e > Tr \\
+	    e + Tl \times (n-1) + c	& e < Tl \\
+	    \end{array}\right. 
+    \end{equation}
+    After that
+    \begin{equation}\label{eqn:range2}
+	e' > Tr \times n + (n-1) + c \mbox{or} e' < Tl \times n + c.
+    \end{equation}
+\end{frame}
+
+\begin{frame}
+\frametitle{Additive Prediction-Error Expansion}
+    From generalized expansion (\ref{eqn:gpe1}) and its variant:
+    \begin{equation}\label{eqn:ape}
+     e' = \left\{ \begin{array}{l@{,\quad}l}
+      e + sign(e) \times b & |e| = \mathit{ME} \\
+      e + sign(e) \times 1 & |e| \in [\mathit{ME}+1,\mathit{LE}) \\
+    \end{array} \right.
+    \end{equation}
+    \vspace{-0.3cm}
+    \begin{columns}[c]
+	\column{.49\textwidth}
+	    \includegraphics[height=4cm]{addexp.eps} 
+	\column{.49\textwidth}
+	    Extracting: $ b = \left\{ \begin{array}{r@{,\quad}l}
+	      0 & |e'| = \mathit{ME} \\
+	      1 & |e'| = \mathit{ME} + 1. \\
+	    \end{array} \right. $ \\
+    \end{columns}
+    Recovery: $ e = \left\{ \begin{array}{r@{,\quad}l}
+      e' - sign(e') \times b & |e'| \in [\mathit{ME}, \mathit{ME}+1] \\
+      e' - sign(e') \times 1 & |e'| \in (\mathit{ME}+1, \mathit{LE}] \\
+    \end{array} \right. $
+\end{frame}
+
+\begin{frame}
+\frametitle{Over/underflow Prevention}
+    \begin{columns}[c]
+	\column{.4\textwidth}
+	Data structures for over/underflow prevention: \\
+	    \begin{itemize}
+		\item Location Map
+		\item Overflow Map
+		\item Index Array
+		\item Boundary Map
+	    \end{itemize}
+	\column{.68\textwidth}
+	    \includegraphics[width=6cm,height=5cm]{boundary.mps}
+    \end{columns}
+    \centering
+\end{frame}
+
+\begin{frame}
+    \frametitle{Overhead Information}
+    Bookkeeping data:
+    \begin{itemize}
+	\item parameters ($n$, $Tl$, $Tr$ \textsl{et al.})
+	\item over/underflow prevention data (boundary map \textsl{et al.})
+    \end{itemize}
+    \centering
+    \includegraphics[width=8cm,height=4.5cm]{overhead.eps}
+\end{frame}
+
+
+\end{document}

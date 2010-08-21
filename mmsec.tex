@@ -1,0 +1,620 @@
+\documentclass{sig-alternate}
+\clubpenalty=10000
+\widowpenalty=10000
+\usepackage{epsfig}
+\usepackage{cite}
+
+\begin{document}
+\conferenceinfo{MM\&Sec'09,}{September 7--8, 2009, Princeton, New Jersey, USA.}
+\CopyrightYear{2009}
+\crdata{978-1-60558-492-8/09/07}
+
+\title{Reversible Data Hiding Using Additive Prediction-Error Expansion}
+
+\numberofauthors{1}
+\author{
+\alignauthor Ming Chen, Zhenyong Chen, Xiao Zeng, Zhang Xiong \\
+  \affaddr{School of Computer Science and Engineering}\\
+  \affaddr{Beihang University}\\
+  \affaddr{Beijing, 100191 China}\\
+  \email{\{mingchen@cse.\}\{chzhyong@\}\{zengxiao29@cse.\}\{xiongz@\}buaa.edu.cn}
+}
+
+% make the title area
+\maketitle
+
+\begin{abstract}
+Reversible data hiding is a technique that embeds secret data into cover media through an invertible
+process. In this paper, we propose a reversible data hiding scheme that can embed a large amount of
+secret data into image with imperceptible modifications. The prediction-error, difference between
+pixel value and its predicted value, is used to embed a bit '1' or '0' by expanding it additively or
+leaving it unchanged. Low distortion is guaranteed by limiting pixel change to 1 and averting
+possible pixel over/underflow; high pure capacity is achieved by adopting effective predictors to
+greatly exploit pixel correlation and avoiding large overhead like location map. Experimental
+results demonstrate that the proposed scheme provides competitive performances compared with other
+state-of-the-art schemes. 
+\end{abstract}
+
+% A category with the (minimum) three required fields
+\category{I.4.m}{Image Processing and Computer Vision}{Miscellaneous}
+%A category including the fourth, optional field follows...
+\category{K.6.5}{Security and Protection}{Authentication}
+
+\terms{Algorithms, Experimentation, Performance}
+
+% Note that keywords are not normally used for peerreview papers.
+\keywords{Additive prediction-error expansion, difference expansion, reversible data hiding,
+reversible watermarking}
+
+\section{Introduction}
+Data hiding is a technique that imperceptibly hides secret data into cover media contents such as
+audios, images, and videos. Being the essential of watermarking and steganography, data hiding is
+widely adopted in applications including copyright protection, content authentication, and media
+asset management. For many data hiding schemes, there exists a drawback that the cover media is
+permanently distorted due to irreversible operations such as replacement, quantization, roundoff and
+truncation. This makes data hiding prohibited in applications dictating high fidelity, e.g.\
+military and medical imaging. In these scenarios, reversible data hiding, which can recover the
+original cover media, is desired and required.
+
+Recently, many reversible data hiding schemes were proposed. A well known category is reversible
+data hiding using difference expansion (DE), which was first proposed by Tian \cite{Tian03de}. By
+expanding the differences between the two neighboring pixels within pixel pairs, image redundancy
+was largely exploited in his scheme. Tseng et al. \cite{Tseng08deextended} improved Tian's scheme by
+shifting the histogram to form a new type of pixel pair, which contributes to increase the embedding
+capacity while keeping the distortion low. DE is also generalized and applied to triplets and quads
+by Alattar \cite{Alattar04deip}, who proposed several DE schemes of better performance with enlarged
+overall capacity and lowered overhead cost. Recently, Kim \cite{Kim08ifs} proposed a novel scheme
+devoted to further reduce the size of location map. Furthermore, Lin et al.\ \cite{Lin08} proposed
+another DE scheme, where the location map is removed completely. Instead of expanding interpixel
+differences, Thodi et al.\ \cite{Thodi07pee} and Kuribayashi et al.\ \cite{Kuribayashi08} applied
+the DE method to prediction-errors, which exploit image redundancy to greater extent than interpixel
+differences. Thodi et al.\ also utilized a histogram operation to disambiguate expanded pixels and
+non-expanded pixels instead of using a location map, and only recorded those overflow pixels with an
+overflow map which is much more compressible than a location map. Hu et al.\ \cite{Hu2009} advanced
+Thodi et al.'s strategy and proposed a scheme with improved overflow map.
+
+Another well known category of reversible data hiding schemes uses histogram to embed data. Ni et
+al.\ \cite{Ni06hist} proposed a novel reversible data hiding scheme of very high image quality but
+limited capacity. They utilized the peak/zero points of histogram for data embedding. Lin and Hsueh
+\cite{Lin08tp} expanded Ni et al.'s approach and applied similar operation to histogram of
+three-pixel differences, by which much better performance was achieved. By properly selecting the
+peak/zero points via dynamic programming, Chung et al.\ \cite{Chung08dyna} proposed a scheme with
+larger embedding capacity.
+
+However, the delimitation between the above two categories is somehow indefinite, since DE can also
+be interpreted in the perspective of histogram, and that is what scheme \cite{Kim08hist} means
+essentially. Conversely, histogram operation can also be employed to improve the performance of DE
+\cite{Tseng08deextended}, or help compress location map \cite{Chang07letter} or even eliminate it
+\cite{Thodi07pee,Kim08hist,Hu2009}.
+
+This paper presents a reversible data hiding scheme using additive prediction-error expansion. The
+proposed scheme embeds bits by expanding prediction-errors, which are actually differences between
+pixel values and their predicted values, and it expands prediction-errors by addition, which is
+similar to the peak/zero histogram operation. The resulting additive prediction-error expansion
+strategy is efficient, because prediction-errors are good at decorrelating pixels and enlarging
+capacity, while additive expansion is free of large distortion and expensive overhead information.
+Another important merit of this paper is that a study involving many predictors varying from simple
+to complex is conducted to examine their performances in reversible data hiding. From the study, we
+find the predictor frequently used in previous schemes \cite{Thodi07pee,Kuribayashi08,Hu2009} is
+actually not a good one in most cases. Instead, we find another predictor which is better and
+simpler.
+
+The rest of the paper is organized as follows. Details of the proposed scheme including additive
+expansion, prediction, over/underflow prevention and overhead information, and capacity and visual
+quality are described in Section \ref{sec:ape}. Then experimental results are presented and
+evaluated in Section \ref{sec:results}. Finally, conclusions are drawn in Section
+\ref{sec:conclude}.
+
+\section{The proposed scheme}\label{sec:ape}
+\subsection{Additive Expansion}\label{sub:ae}
+For most DE schemes
+\cite{Tian03de,Tseng08deextended,Alattar04deip,Kim08ifs,Lin08,Thodi07pee,Kuribayashi08,Hu2009}, as
+well as some histogram operation schemes like \cite{Kim08hist}, the essential of reversible data
+hiding is the bit-shifting expansion, which can be expressed as
+\begin{equation}\label{eqn:bde}
+  d' = 2d + b,
+\end{equation}
+where $d$ is a difference and $b$ is a binary bit to be embedded. The bit-shifting expansion
+(\ref{eqn:bde}) is reversible because the embedded bit can be extracted via $b = d' \bmod 2$ and the
+original difference can be recovered via $d = d' / 2$.
+
+Being different, the proposed additive expansion is based on the statistical characters of
+prediction-error, and it quite resembles the peak/zero points operation of histogram. Firstly,
+predicted values of pixels are calculated utilizing a predictor, which works by guessing a pixel
+value from its previous pixels. Then prediction-errors are obtained via
+\begin{equation}
+  e = x - \hat{x},
+\end{equation}
+where $\hat{x}$ is the predicted value of pixel $x$. The prediction-errors can be positive or
+negative, and the positive part and the negative part should be considered separately in additive
+expansion. However, to ease the discussion, we consider them uniformly by dealing with absolute
+prediction-error. The histogram of absolute prediction-error is exemplified in Fig.\
+\ref{fig:addexp}, where the peak point and the left-most zero point are marked and identified with
+$\mathit{ME}$ and $\mathit{LE}$ respectively. The additive expansion is formulated as
+\begin{equation}\label{eqn:ape}
+ e' = \left\{ \begin{array}{l@{,\quad}l}
+  e + sign(e) \times b & |e| = \mathit{ME} \\
+  e + sign(e) \times 1 & |e| \in [\mathit{ME}+1,\mathit{LE}) \\
+\end{array} \right.
+\end{equation}
+where
+\begin{equation}
+  sign(e) = \left\{ \begin{array}{r@{,\quad}l}
+    1 & e \ge 0 \\ -1 & e < 0.
+  \end{array} \right.
+\end{equation}
+In Fig.\ \ref{fig:addexp}, we can see that prediction-errors at $\mathit{ME}$ (expandable
+prediction-errors) are expanded to hide bits by addition, whereas prediction-errors between
+$\mathit{ME+1}$ and $\mathit{LE-1}$ (shiftable prediction-errors) are shifted right by 1 to
+differentiate them from expanded prediction-errors. After that, we finish the embedding by replacing
+$x$ with $x' = \hat{x} + e'$.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=8.5cm]{addexp.eps}
+  \caption{\label{fig:addexp}Illustration of additive prediction-error expansion.}
+\end{figure}
+
+During the extracting, the same prediction process is undertaken to recalculate the same predicted value $\hat{x}$ and the corresponding prediction-error $e' = x' - \hat{x}$. Once the same $\mathit{ME}$ and $\mathit{LE}$ are known, we can tell where bits are embedded and extract them via
+\begin{equation}\label{eqn:addextract}
+  b = \left\{ \begin{array}{r@{,\quad}l}
+  0 & |e'| = \mathit{ME} \\
+  1 & |e'| = \mathit{ME} + 1. \\
+\end{array} \right.
+\end{equation}
+Then original prediction-errors can be recovered through
+\begin{equation}\label{eqn:addrecover}
+ e = \left\{ \begin{array}{r@{,\quad}l}
+  e' - sign(e') \times b & |e'| \in [\mathit{ME}, \mathit{ME}+1] \\
+  e' - sign(e') \times 1 & |e'| \in (\mathit{ME}+1, \mathit{LE}] \\
+\end{array} \right.
+\end{equation}
+Finally, we restore the original pixel by $x = \hat{x} + e$.
+
+Compared with the bit-shifting expansion, the additive expansion is advantageous in two aspects: 1)
+the distortion caused by additive expansion is less, since pixels are changed at most by 1; 2) no
+location map is needed to tell between expanded prediction-errors and non-expanded ones since they
+are distinguishable with $\mathit{ME}$ and $\mathit{LE}$.
+
+\subsection{Prediction}\label{sub:pe}
+In the proposed additive expansion, the expanded differences are prediction-errors, differences
+between pixel values and their predicted values. There are two reasons for preferring
+prediction-errors to interpixel differences.
+
+The first reason is that prediction requires no blocking, which is a process of dividing the cover
+image into non-overlapped pixels blocks required in many DE schemes. By blocking, it takes more than
+one pixel to find a difference, which significantly reduces the amount of differences and in turn
+lessens the potential embedding capacity. Let $I=\{x[i,j],1 \le i \le H,1 \le j \le W\}$ be an image
+of width $W$ and height $H$. For a pixel block sized $X$, the number of differences is just
+$WH(X-1)/X$, which means that $1/X$ pixels are spent to find differences. The cost is considerably
+expensive because $X$ cannot be large, or else the decorrelation capability of differences degrades
+sharply due to absence of locality. Nevertheless, replacing interpixel differences with
+prediction-errors, we get $WH$ differences not considering some negligible marginal pixels. This
+means there are more candidates for data embedding, which promises a larger capacity.
+
+The second reason for preferring prediction-errors to interpixel differences is credited to the
+superior decorrelation ability of prediction-error. Fundamentally, the feasibility of reversible
+data hiding is due to high redundancy or correlation within images, which means that ``the value of
+any given pixel can be reasonably predicted from the value of its neighbors'' \cite{Gonzalez02dip}.
+To maximize the capacity of data hiding, we should exploit the correlation to the largest extent. As
+reversible data hiding is a relatively new discipline, lossless image compression has undergone
+decades of active research to exploit the redundancy of image and has achieved fruitful results. So,
+intuitively, it may be rewarding to introduce effective tools therein into reversible data hiding.
+Prediction is such a tool proved of excellent decorrelation capability.
+
+As a matter of fact, prediction-error has already been preferred in schemes
+\cite{Thodi07pee,Kuribayashi08,Hu2009} as improvements of Tian's approach. However, in schemes
+\cite{Thodi07pee,Kuribayashi08,Hu2009}, prediction-errors were still expanded by bit-shifting, which
+tends to cause larger distortion since differences are doubled. What is more, the predictor they
+adopted is not a good one in most cases, and that is the very issue we address in this section.
+
+To find a good predictor, an intensive study of different predictors has been conducted and we
+finally obtain five choices. They are 1) the Median Edge Detector predictor (MED) \cite{Loco00ip},
+2) an enhanced predictor for JPEG-LS (EJP) \cite{Enhancedjpegls}, 3) the Gradient-Adjusted Predictor
+(GAP) \cite{Wu97calic2}, 4) a simplified version of the GAP (SGAP), and 5) a least-square based
+predictor proposed in \cite{Kau05lsap} (ELA). Being an important component of LOCO-I
+\cite{Loco00ip}, MED is a context adaptive predictor combining three linear predictors by detecting
+edges and adjusting coefficients correspondingly. It is also the predictor used in previous
+reversible data hiding schemes \cite{Thodi07pee,Kuribayashi08,Hu2009}. The enhanced predictor for
+JPEG-LS was proposed in \cite{Enhancedjpegls} where the performance of LOCO-I was reported to be
+enhanced by replacing MED with EJP. The GAP predictor is also an adaptive predictor which is
+adjusted according to seven different contexts around the predicted pixel. Its simplified version,
+namely SGAP, gets rid of the complicated adaption and unexceptionally adopts the most common case.
+The ELA is a least-square based predictor, coefficients of which are adjusted to minimize the
+least-square error via an autoregression process.
+
+The MED predictor is
+\begin{equation}\label{eqn:med1}
+  \hat{x} = \left\{ \begin{array}{l@{,\quad}l}
+      \min(x_w,x_n)     & x_{nw} \ge \max(x_w,x_n) \\
+      \max(x_w,x_n)     & x_{nw} \le \min(x_w,x_n) \\
+      x_n + x_w - x_{nw}    & otherwise,
+\end{array} \right.
+\end{equation}
+where $x_n$, $x_w$, $x_{nw}$ are causal pixels illustrated in Fig.\ \ref{fig:prediction}. The SGAP
+predictor is
+\begin{equation}\label{eqn:sgap}
+  \hat{x} = \frac{x_n + x_w}{2} + \frac{x_{ne} - x_{nw}}{4}.
+\end{equation}
+The formulas of EJP, GAP and ELA are quite complex, so we refer to
+\cite{Enhancedjpegls,Wu97calic2,Kau05lsap} for the details.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=8cm]{prediction.eps}
+  \caption{\label{fig:prediction}Prediction. Image is processed in the raster scan order. Marginal
+  pixels are left unchanged to correctly initialize the same prediction during extracting. Causal
+  pixels are identified with their relative position to the current pixel.}
+\end{figure}
+
+As the capacity of additive prediction-error expansion approximates the number of expandable
+prediction-errors, we have implemented the five predictors and have worked out those numbers of ten
+test images. The results are shown in Table \ref{tbl:predictors}.\footnote{All test images
+considered in this paper are $512 \times 512$ 8-bit grayscale standard images.} Among the five
+predictors, the GAP predictor stands out as the best choice in average, followed by the SGAP
+predictor and the MED predictor. For all images except Tiffany, the GAP predictor performs better
+than the MED predictor, which is the one adopted in \cite{Thodi07pee,Kuribayashi08,Hu2009}.
+Moreover, the simplified GAP predictor (SGAP) is still better than the MED predictor for eight of
+the ten images.
+
+\begin{table}
+    \centering
+    \caption{\label{tbl:predictors}Prediction in additive expansion.}
+  \begin{tabular}{llllll}\hline\hline
+    Image & MED & EJP & GAP & SGAP & ELA \\\hline
+     Lena & 62205  & 56170  & 67475  & 67669  & 62540 \\
+ Babbon & 20495  & 17603  & 22076  & 21411  & 22083 \\
+ Plane  & 80123  & 72513  & 83084  & 81625  & 63138 \\
+ Man    & 55269  & 47626  & 56773  & 55625  & 49617 \\
+ Boat   & 33123  & 28715  & 36089  & 34763  & 35673 \\
+ Goldhill & 40037  & 32747  & 41195  & 39831  & 40419 \\
+ Tiffany & 50950  & 44388  & 45943  & 45089  & 35910 \\
+ Peppers & 32666  & 32394  & 38822  & 38822  & 38678 \\
+ Sailboat& 30062  & 28411  & 34104  & 33846  & 32230 \\
+ Barbara & 43376  & 37510  & 46876  & 45358  & 45252 \\
+ Average & 44831  & 39808  & 47244  & 46404  & 42554 \\\hline\hline
+  \end{tabular}
+\end{table}
+
+However, it is suspicious of unfair comparison because the MED predictor adopted in
+\cite{Thodi07pee,Kuribayashi08,Hu2009} was intended for bit-shifting expansion while we are
+considering additive expansion in Table \ref{tbl:predictors}. To justify our discussion, we also
+compare the performances of those predictors in bit-shifting expansion. For DE scheme using
+bit-shifting expansion, the overall capacity grows when more differences are expanded, and
+simultaneously the location map becomes more compressible. That is, the pure capacity grows as there
+are more small expandable differences. Moreover, smaller differences introduce less distortion
+($\Delta x = x' - x = e + b$) when they are expanded. So the number of small prediction-errors
+indicates the performance of predictors for reversible data hiding. By setting the threshold to 10,
+we have worked out the number of prediction-errors less than the threshold. The results are
+tabulated in Table \ref{tbl:predictors2}, where GAP is still the best predictor in average, followed
+by ELA, SGAP, MED and EJP.
+
+It is worth notice that the SGAP predictor is rather competitive considering its great simplicity
+which requires much less computation than the other four predictors. On our platform, the SGAP
+predictor takes 6.7ms to finish the prediction of a test image in average, whereas the time is 36ms
+for MED under the same circumstance, and the same times for EJP, GAP and ELA are still longer.
+
+\begin{table}[t]
+  \centering
+  \caption{\label{tbl:predictors2}Prediction in bit-shifting expansion.}
+  \begin{tabular}{llllll}\hline\hline
+    Image & MED & EJP & GAP & SGAP & ELA \\\hline
+   Lena & 240357 & 226750 & 242376 &241781  & 242688 \\
+  Baboon & 147889 & 127679 & 152611 &148356  & 156782 \\
+  Plane & 238042 & 221261 & 237872 &233049  & 234180 \\
+  Man   & 220604 & 199933 & 222190 &219158  & 217115 \\
+  Boat  & 207326 & 180770 & 214078 &207876  & 209746 \\
+  Goldhill& 219422 & 190300 & 219867 &214332  & 216413 \\
+  Tiffany & 217093 & 197924 & 220063 &217085  & 209195 \\
+  Peppers & 217345 & 200156 & 228056 &227303  & 222929 \\
+  Sailboat & 187909 & 167977 & 196453 &195122  & 189724 \\
+  Barbara & 196765 & 173820 & 197847 &191863  & 222283 \\
+  Average & 209275 & 188657 & 213141 &209593  & 212106 \\\hline\hline
+  \end{tabular}
+\end{table}
+
+\subsection{Over/underflow Prevention and Overhead Information}\label{sub:embed}
+Up to now, two issues remain not addressed for the scheme to achieve reversibility. The first issue
+is the over/underflow problem, which happens when pixels are changed from 255 to 256 or from 0
+to -1. Our solution is to apply additive expansion only to pixels valued from 1 to 254. However, it
+causes ambiguities when pixels valued 1 are changed to 0, or pixels valued 254 are changed to 255.
+So these pixels need be recorded as overhead information to tell whether boundary pixels (pixels
+valued 0 or 255) are changed or not during the extracting process. We refer to \cite{Lin08tp} for
+further details of this technique. Moreover, the overflow map techniques in \cite{Thodi07pee,Hu2009}
+are also applicable to address this issue.
+
+The second issue concerns the recording of overhead information. Beside the data for disambiguating
+boundary pixels, $\mathit{ME}$ and $\mathit{LE}$ should also be recorded to identify expanded and
+shifted prediction-errors. Being different, $\mathit{ME}$ and $\mathit{LE}$ cannot be directly
+recorded as overhead information, since they are the keys to initialize the extracting. Instead,
+they can be embedded into the same image using other data hiding techniques like LSB. Note in Fig.\
+\ref{fig:prediction} that some marginal pixels are not predicted because of lack of prediction
+contexts, and we can embed the overhead like $\mathit{ME}$ and $\mathit{LE}$ right into these pixels
+using LSB replacement. An illustration of this strategy is given in Fig.\ \ref{fig:overhead}. Those
+pixels accommodating $\mathit{ME}$ and $\mathit{LE}$ will not be used at the very beginning of the
+extracting process since the image is processed in raster scan order. Therefore, this strategy has
+no impact on the reversibility of the proposed scheme as long as we record the original LSB bits of
+these pixels as payload and place them back once they are extracted.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=8cm]{overhead.eps}
+  \caption{\label{fig:overhead}LSB replacement of the overhead information of $\mathit{ME}$ and $\mathit{LE}$.}
+\end{figure}
+
+\subsection{Capacity and Visual Quality}
+The proposed scheme guarantees high image quality since pixels are changed at most by 1 and the
+over/underflow problem is prevented. When lower image quality is acceptable, it is also capable of
+providing larger capacity through two strategies.
+
+One strategy is to apply the proposed scheme recursively, namely through multi-layer embedding. To
+alleviate the accumulation of distortion in multi-layer embedding, we seek an optimal predictor from
+the five predictors for each embedding layer instead of employing a fixed predictor for all layers.
+Moreover, we also seek an optimal scanning order by rotating the image by $90^\circ$, $180^\circ$ or
+$270^\circ$ to maximize the capacity. This strategy performs well in pursuing high performance,
+however, it is time-consuming due to the multi-layer embedding.
+
+The other strategy is to generalize the additive prediction-error expansion to
+\begin{equation}\label{eqn:ape2}
+ e' = \left\{ \begin{array}{l@{,\quad}l}
+  e + sign(e) \times (b)_n & |e| = \mathit{ME} \\
+  e + sign(e) \times (n-1) & |e| \in [\mathit{ME}+1,\mathit{LE}) \\
+\end{array} \right.
+\end{equation}
+where $(b)_n$ is a base $n$ digit to be embedded and $\mathit{LE}$ identifies $n-1$ sequent zero
+points. This strategy achieves capacity modulation in single-layer embedding and does not need the
+adaption in the first one.
+
+Note that both strategies require some adjustments to ensure reversibility. For example, the code of
+the chosen predictor in the first strategy and the adopted $n$ in the second strategy should also be
+recorded like $\mathit{ME}$ and $\mathit{LE}$.
+
+\section{Experimental Results}\label{sec:results}
+
+The proposed reversible data hiding scheme is implemented and tested using MATLAB. In our
+experiments, a random bit sequence is taken as the hidden data, and image quality and capacity are
+measured with PSNR and bpp (bit per pixel) respectively. The results are presented in Fig.\
+\ref{fig:performances}. For multi-layer embedding, the adopted predictor and the scanning order are
+dynamically chosen to adapt to each embedding layer, and for single-layer embedding, the adopted
+predictor is SGAP and larger capacities are achieved by enlarging the base $n$. The test images and
+their marked counterparts are also presented in Fig.\ \ref{fig:images}, where the visual quality of
+the marked images is satisfactory.
+
+\begin{figure*}[t]
+  \begin{minipage}[t]{.49\linewidth}
+      \centering
+      \includegraphics[width=8cm]{cmp_le.eps}
+      \centerline{(a) Lena}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.49\linewidth}
+      \centering
+      \includegraphics[width=8cm]{cmp_ba.eps}
+      \centerline{(b) Baboon}
+  \end{minipage}
+
+  \begin{minipage}[b]{.49\linewidth}
+      \centering
+      \includegraphics[width=8cm]{cmp_pl.eps}
+      \centerline{(c) Plane}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{.49\linewidth}
+      \centering
+      \includegraphics[width=8cm]{cmp_sa.eps}
+      \centerline{(d) Sailboat}
+  \end{minipage}
+  \caption{\label{fig:performances}The performance evaluation of the proposed scheme over standard
+  test images.}
+\end{figure*}
+
+
+To obtain an objective evaluation of the proposed scheme, several other schemes are compared in
+Fig.\ \ref{fig:performances}. Schemes \cite{Kim08ifs,Lin08,Kim08hist} achieve reversible data hiding
+through bit-shifting expansion, and their capacities are controlled using threshold, whereas scheme
+\cite{Lin08tp} achieves larger capacities through multi-layer embedding. The single-layer embedding
+of the proposed scheme performs well when the PSNR is above 45dB, however, its curves slump quickly
+when it is pursuing larger capacity. For single-layer embedding, the proposed scheme is better than
+\cite{Kim08ifs,Lin08,Kim08hist} for smooth images (Lena and Plane), but it is not as good as the
+three schemes at low PSNR standards for the other two images. For multi-layer embedding, the
+proposed scheme performs better than schemes \cite{Kim08ifs,Lin08,Kim08hist} for all the four
+images, as well as scheme \cite{Lin08tp}, which is also a multi-layer embedding scheme.
+
+Other schemes using prediction-error \cite{Thodi07pee,Kuribayashi08,Hu2009} are also considered, and
+the latest one proposed by Hu et al.\ \cite{Hu2009} is chosen for evaluation as it provides the best
+performance. The comparison is also presented in Fig.\ \ref{fig:performances}, where our
+single-layer embedding is not as good as their scheme, while our multi-layer embedding is generally
+better. The advantage of the proposed scheme is apparent at high PSNR standards (>40 dB), whereas
+its ascendancy becomes marginal when PSNR becomes lower (Lena). However, once the limit of
+single-layer embedding (1 bpp) is approached, the multi-layer embedding becomes competitive again
+(Lena and Plane).
+
+One important merit of this paper is that a predictor (SGAP) simpler but better than the widely
+adopted predictor (MED) is identified for reversible data hiding. To validate our study, the two
+predictors are compared considering the normal bit-shifting expansion (scheme \cite{Hu2009} is
+adopted here). The results are presented in Fig.\ \ref{fig:medsgap}, where better performance is
+obtained by simply replacing MED with SGAP.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=8cm]{cmp_predictor.eps}
+    \caption{\label{fig:medsgap}MED predictor vs. SGAP predictor for bit-shifting expansion.}
+\end{figure}
+
+\begin{figure*}[t]
+  \begin{minipage}[t]{.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{olena.eps}
+    \centerline{(a) Original Lena}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{hlena.eps}
+    \centerline{(b) 39.00 dB with 0.71 bpp}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{obaboon.eps}
+    \centerline{(c) Original Baboon}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{hbaboon.eps}
+    \centerline{(d) 38.70 dB with 0.29 bpp }\medskip
+  \end{minipage}
+
+  \begin{minipage}[b]{.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{oplane.eps}
+    \centerline{(e) Original Plane}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{hplane.eps}
+    \centerline{(f) 39.14 dB with 0.83 bpp}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{osailboat.eps}
+    \centerline{(g) Original Sailboat}\medskip
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.24\linewidth}
+    \centering
+    \includegraphics[width=4cm]{hsailboat.eps}
+    \centerline{(h) 38.85 dB with 0.42 bpp }\medskip
+  \end{minipage}
+
+  \caption{\label{fig:images}Original and marked grayscale test images.}
+\end{figure*}
+
+\section{Conclusions}\label{sec:conclude}
+This paper presents a reversible data hiding scheme using additive prediction-error expansion, which
+significantly exploits the image redundancy through prediction and completely disposes of the
+location map through additive expansion. Several predictors are also studied considering their
+performances in reversible data hiding, and a predictor (SGAP) better than the normal MED predictor
+is identified. Compared with other state-of-the-art schemes, the proposed one provides high image
+quality in single-layer embedding and achieves large capacity through multi-layer embedding.
+
+\section*{Acknowledgment}
+The authors would like to thank the reviewers for their insightful comments and valuable
+suggestions. Ming Chen thanks Prof. Yuebin Bai for his encouragement that makes this paper possible,
+and his review that makes it better.
+
+%\bibliographystyle{abbrv}
+%\bibliography{../../wmbib}
+
+\begin{thebibliography}{10}
+
+\bibitem{Alattar04deip}
+A.~M. Alattar.
+\newblock Reversible watermark using the difference expansion of a generalized
+  integer transform.
+\newblock {\em IEEE Trans. Image Processing}, 3(8):1147--1156, 2004.
+
+\bibitem{Chang07letter}
+Z.~Chang, W.~Kou, and J.~Xu.
+\newblock More compressible location map for reversible watermarking using
+  expansion embedding.
+\newblock {\em Electron. Lett.}, 43:1353--1354, 2007.
+
+\bibitem{Chung08dyna}
+K.-L. Chung, Y.-H. Huang, W.-N. Yang, Y.-C. Hsu, and C.-H. Chen.
+\newblock Capacity maximization for reversible data hiding based on dynamic
+  programming approach.
+\newblock {\em Applied Mathematics and Computation}, 208(1):284--292, 2009.
+
+\bibitem{Gonzalez02dip}
+R.~C. Gonzalez and R.~E. Woods.
+\newblock {\em Digital Image Processing}.
+\newblock Prentice-Hall, 2 edition, 2002.
+
+\bibitem{Hu2009}
+Y.~Hu, H.-K. Lee, and J.~Li.
+\newblock \uppercase{DE}-based reversible data hiding with improved overflow
+  location map.
+\newblock {\em IEEE Trans. Circuits and Systems for Video Technology},
+  19(2):250--260, Feb. 2009.
+
+\bibitem{Enhancedjpegls}
+J.~Jiang, B.~Guo, and S.~Y. Yang.
+\newblock Revisiting the \uppercase{JPEG-LS} prediction scheme.
+\newblock In {\em Vision, Image and Signal Processing}, pages 575--580, 2000.
+
+\bibitem{Kau05lsap}
+L.-J. Kau and Y.-P. Lin.
+\newblock Adaptive lossless image coding using least squares optimization with
+  edge-look-ahead.
+\newblock {\em IEEE Trans. Circuits and Systems}, 52(11):751--755, 2005.
+
+\bibitem{Kim08ifs}
+H.-J. Kim, V.~Sachnev, Y.~Q. Shi, J.~Nam, and H.-G. Choo.
+\newblock A novel difference expansion transform for reversible data embedding.
+\newblock {\em IEEE Trans. Information Forensic and Security}, 3(3):456--465, 2009.
+
+\bibitem{Kim08hist}
+K.-S. Kim, M.-J. Lee, H.-K. Lee, and Y.-H. Suh.
+\newblock Histogram-based reversible data hiding technique using subsampling.
+\newblock In {\em ACM Multimedia and Security 08}, pages 69--75, Oxford, UK,
+  2008.
+
+\bibitem{Kuribayashi08}
+M.~Kuribayashi, M.~Morii, and H.~Tanaka.
+\newblock Reversible watermark with large capacity based on the prediction
+  error expansion.
+\newblock {\em IEICE Trans. Fundamentals}, E91(7):1780--1790, 2008.
+
+\bibitem{Lin08tp}
+C.-C. Lin and N.-L. Hsueh.
+\newblock A lossless data hiding scheme based on three-pixel block differences.
+\newblock {\em Pattern Recognition}, 41(4):1415--1425, 2008.
+
+\bibitem{Lin08}
+C.~C. Lin, S.~P. Yang, and N.~L. Hsueh.
+\newblock Lossless data hiding based on difference expansion without a location
+  map.
+\newblock In {\em 2008 Congress on Image and Signal Processing}, pages 8--12,
+  2008.
+
+\bibitem{Ni06hist}
+Z.~Ni, Y.-Q. Shi, N.~Ansari, and W.~Su.
+\newblock Reversible data hiding.
+\newblock {\em IEEE Trans. Circuits and Systems for Video Technology},
+  16(3):354--362, 2006.
+
+\bibitem{Thodi07pee}
+D.~M. Thodi and J.~J. Rodriguez.
+\newblock Expansion embedding techniques for reversible watermarking.
+\newblock {\em IEEE Trans. Image Processing}, 16(3):721--730, 2007.
+
+\bibitem{Tian03de}
+J.~Tian.
+\newblock Reversible data embedding using a difference expansion.
+\newblock {\em IEEE Trans. Circuits and Systems for Video Technology},
+  13(8):890--896, 2003.
+
+\bibitem{Tseng08deextended}
+H.~W. Tseng and C.~C. Chang.
+\newblock An extended difference expansion algorithm for reversible
+  watermarking.
+\newblock {\em Image and Vision Computing}, 26(8):1148--1153, 2008.
+
+\bibitem{Loco00ip}
+M.~J. Weinberger, G.~Seroussi, and G.~Sapiro.
+\newblock The \uppercase{LOCO-I} lossless image compression algorithm:
+  Principles and standardization into \uppercase{JPEG-LS}.
+\newblock {\em IEEE Trans. Image Processing}, 9(8):1309--1324, 2000.
+
+\bibitem{Wu97calic2}
+X.~Wu and N.~Memon.
+\newblock Context-based, adaptive, lossless image coding.
+\newblock {\em IEEE Trans. Communication}, 45(4):437--444, 1997.
+
+\end{thebibliography}
+
+\end{document}
