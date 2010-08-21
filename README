@@ -19,7 +19,7 @@ Contents
 jstsp.tex, icip.tex, mmsec.tex are source files of these papers. 
 icip-poster.pdf is the poster for ICIP 2009 at Cario.
 mmsec-slides.tex is the slides for MMSEC 2009 in Princeton University.
-other .tex are sources of pictures I drawed using PSTricks.
-.mp are sources of pictures I drawed using Metapost.
-.asy are sources of pictures I drawed using Asymptote.
+other .tex are sources of pictures I drew using PSTricks.
+.mp are sources of pictures I drew using Metapost.
+.asy are sources of pictures I drew using Asymptote.
 wmbib.bib is my bibtex file
